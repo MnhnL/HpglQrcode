@@ -16,7 +16,7 @@ class Writer:
 # PU: Pen Up
 # PD: Pen Down
 
-class GCodeWriter(Writer):
+class HpglWriter(Writer):
     def __init__(self, buffer, depth, step_mm, clearance=2, feedrate=600):
         self.buffer = buffer
         self.x_bit_position = 0
@@ -67,7 +67,7 @@ class GCodeWriter(Writer):
         self.buffer.write("\n")
 
 
-def generate_gcode(text, output_file, depth, width=None, step=None):
+def generate_hpgl(text, output_file, depth, width=None, step=None):
     text = pyqrcode.create(text, error='H')
 
     print(text.terminal())
@@ -80,7 +80,7 @@ def generate_gcode(text, output_file, depth, width=None, step=None):
             step_mm = round(step, 2)
 
         print('Total size of QRCode {size:.3f}mm with steps of {step:.3f}mm'.format(size=len(code)*step_mm, step=step_mm))
-        writer = GCodeWriter(output, depth, step_mm)
+        writer = HpglWriter(output, depth, step_mm)
         writer.add_header()
         for row in code:
             # Each code has a quiet zone on the left side, this is the left
@@ -95,7 +95,7 @@ def generate_gcode(text, output_file, depth, width=None, step=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Generate CNC QRCode GCode from a string.')
+    parser = argparse.ArgumentParser(description='Generate CNC QRCode HP-GL from a string.')
     parser.add_argument('text_to_encode', type=str, metavar='TEXT',
                         help='Text to encode in a QRCode')
 
@@ -110,13 +110,13 @@ def main():
                        help='Step per bit in mm of the final QRCode')
 
     parser.add_argument('-o', '--output', dest='output_file', type=str, default='output.hpg',
-                        help='Output GCode file')
+                        help='Output HP-GL file')
 
     args = parser.parse_args()
     if args.width:
-        generate_gcode(text=args.text_to_encode, depth=args.depth, width=args.width, output_file=args.output_file)
+        generate_hpgl(text=args.text_to_encode, depth=args.depth, width=args.width, output_file=args.output_file)
     else:
-        generate_gcode(text=args.text_to_encode, depth=args.depth, step=args.step, output_file=args.output_file)
+        generate_hpgl(text=args.text_to_encode, depth=args.depth, step=args.step, output_file=args.output_file)
 
     print('Generation of the GCode is done in {file}'.format(file=args.output_file))
 
